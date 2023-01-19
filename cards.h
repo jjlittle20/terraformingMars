@@ -5,10 +5,10 @@ using std::map;
 using std::pair;
 using std::string;
 using std::vector;
-// vector < map<string<pair<string, int>>> projectCards = {
+
 vector<map<string, vector<pair<string, int>>>> mainCards = {
 
-    {{"production", {{"megaCredits", 2}}}, {"bank", {{"megaCredits", 2}}}, {"costOffSet", {{"megaCredits", 2}}}}
+    {{"metaData", {{"this is card title", 1}, {"This is the card description", 0}}}, {"production", {{"megaCredits", 2}}}, {"bank", {{"megaCredits", 2}}}, {"costOffSet", {{"megaCredits", 2}}}}
 
 };
-vector<map<string, vector<pair<string, int>>>> corporationCards = {{{"production", {{"megaCredits", 2}}}, {"bank", {{"megaCredits", 2}}}, {"costOffSet", {{"megaCredits", 2}}}}};
+vector<map<string, vector<pair<string, int>>>> corporationCards = {{{"metaData", {{"this is card title", 1}, {"This is the card description", 0}}}, {"production", {{"megaCredits", 2}}}, {"bank", {{"megaCredits", 2}}}, {"costOffSet", {{"megaCredits", 2}}}}};
