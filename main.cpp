@@ -12,13 +12,7 @@ using std::pair;
 using std::string;
 using std::vector;
 void createDeck();
-enum CardType
-{
-  event,
-  corporate,
-  active,
-  project
-};
+
 class CardBase
 {
 private:
@@ -26,7 +20,11 @@ private:
 public:
   string title;
   string description;
-  CardType type;
+  string type;
+  int creatures;
+  int creaturesDivision;
+  string creatureName;
+
   int victoryPoints = 0;
   map<string, int> tags = {
       {"science", 0}, {"building", 0}, {"space", 0}, {"earth", 0}, {"jovian", 0}, {"plant", 0}, {"animal", 0}, {"microbe", 0}
@@ -54,7 +52,16 @@ public:
       {
         for (unsigned short i = 0; auto const &[inKey, inValue] : cardConfig[key])
         {
-          production[inKey] = production[inKey] + inValue;
+          if (inKey == "self")
+          {
+          }
+          else if (inKey == "other")
+          {
+          }
+          else
+          {
+            production[inKey] = production[inKey] + inValue;
+          }
         }
       }
       else if (key == "bank")
@@ -80,11 +87,21 @@ public:
           {
             title = inKey;
           }
-          else
+          else if (inValue == 0)
           {
             description = inKey;
           }
+          else if (inValue == 3)
+          {
+            type = inKey;
+          }
         }
+      }
+      else if (key == "creatures")
+      {
+        creatures = 0;
+        creatureName = cardConfig[key][0].first;
+        creaturesDivision = cardConfig[key][0].second;
       }
 
       ++i;
