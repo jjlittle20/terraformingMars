@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "cards.h"
+#include <fstream>
 
 using std::cin;
 using std::cout;
@@ -12,6 +13,11 @@ using std::pair;
 using std::string;
 using std::vector;
 void createDeck();
+void actionPhase();
+void productionPhase();
+void gameLoop();
+void checkWinner();
+void reserchPhase();
 
 class CardBase
 {
@@ -21,6 +27,7 @@ public:
   string title;
   string description;
   string type;
+  bool hasCreatures;
   int creatures;
   int creaturesDivision;
   string creatureName;
@@ -296,6 +303,7 @@ public:
   vector<CardBase> playedProjects;
   vector<CardBase> corporation;
   vector<CardBase> projectCards;
+  bool hasPassed = false;
   map<string, int> tags = {
       {"science", 0}, {"building", 0}, {"space", 0}, {"earth", 0}, {"jovian", 0}, {"plant", 0}, {"animal", 0}, {"microbe", 0}
 
@@ -321,7 +329,43 @@ public:
 
       ++i;
     }
-  }
+  };
+  void playCard(CardBase &card)
+  {
+
+    for (auto const &[key, val] : card.tags)
+    {
+      tags[key] = tags[key] + val;
+    }
+    map<string, vector<pair<string, int>>> newPlayerValues = {{"production", {}}, {"bank", {}}, {"costOffset", {}}};
+
+    for (auto const &[key, val] : newPlayerValues)
+    {
+
+      if (key == "production")
+      {
+        for (auto const &[inKey, inVal] : card.production)
+        {
+          newPlayerValues[key].push_back({inKey, inVal});
+        }
+      }
+      if (key == "bank")
+      {
+        for (auto const &[inKey, inVal] : card.bank)
+        {
+          newPlayerValues[key].push_back({inKey, inVal});
+        }
+      }
+      if (key == "costOffest")
+      {
+        for (auto const &[inKey, inVal] : card.costOffSet)
+        {
+          newPlayerValues[key].push_back({inKey, inVal});
+        }
+      }
+    }
+    updatePlayer(newPlayerValues);
+  };
 };
 vector<CardBase> mainDeck;
 vector<CardBase> corporationDeck;
@@ -330,10 +374,12 @@ vector<Player> players;
 int currentGeneration = 0;
 GlobalParams globalParams;
 bool isNotGameOver = true;
+
 int main(int argc, char const *argv[])
 {
 
-  map<string, vector<pair<string, int>>> testCorporation = {{"production", {{"megaCredits", 2}}}, {"bank", {{"megaCredits", 42}}}, {"costOffset", {{"megaCredits", 1}}}};
+  map<string, vector<pair<string, int>>>
+      testCorporation = {{"production", {{"megaCredits", 2}}}, {"bank", {{"megaCredits", 42}}}, {"costOffset", {{"megaCredits", 1}}}};
 
   int playerCount = 0;
   createDeck();
@@ -418,6 +464,7 @@ int main(int argc, char const *argv[])
   gameLoop();
   return 0;
 }
+
 void gameLoop()
 {
 
@@ -431,7 +478,9 @@ void gameLoop()
     players.push_back(players[0]);
     players.erase(players.begin());
     researchPhase();
+
     actionPhase();
+
     productionPhase();
     currentGeneration++;
   }
@@ -440,9 +489,125 @@ void gameLoop()
 void researchPhase()
 {
   // draw 4 cards decide to buy or not
+  for (size_t i = 0; i < players.size(); i++)
+  {
+    // need to std::random_shuffle() on project then select random
+    Player player = players[i];
+    player.projectCards.insert(player.projectCards.end(), {corporationDeck[0], corporationDeck[0], corporationDeck[0], corporationDeck[0]});
+    vector<int> cardsToDiscard = {};
+    for (size_t i = 0; i < player.projectCards.size(); i++)
+    {
+      CardBase projectCard = player.projectCards[i];
+      cout << "[" << i << "] : " << projectCard.title << endl;
+      string choice = "";
+      bool isChoiceInvalid = true;
+      while (isChoiceInvalid)
+      {
+        cout << "Buy or discard? " << endl;
+        cin >> choice;
+        if (choice == "b" || choice == "buy" || choice == "Buy" || choice == "d" || choice == "discard" || choice == "Discard")
+        {
+          isChoiceInvalid = false;
+        }
+        else
+        {
+          cout << "Invalid choice - type 'buy' or 'discard'";
+        }
+      }
+      if (choice == "b" || choice == "buy" || choice == "Buy")
+      {
+        player.playerHand.push_back(projectCard);
+      }
+      else if (choice == "d" || choice == "discard" || choice == "Discard")
+      {
+        discardDeck.push_back(projectCard);
+      }
+      cardsToDiscard.push_back(i);
+    }
+  }
 }
+vector<bool> havePassed;
+vector<string> actionChoices{"Play Card", "Use Action", "Build Standard Project", "Claim milestone", "Fund award", "Place greenary tile", "Increase tempreture", "pass"};
 void actionPhase()
-{ // 1-2 actions or pass
+{
+  for (size_t i = 0; i < players.size(); i++)
+  {
+    if (players[i].hasPassed)
+    {
+      havePassed.push_back(true);
+      continue;
+    }
+    int maxActions = 2;
+    int currentActions;
+    cout << "What action would you like to take?" << endl;
+    for (size_t i = 0; i < actionChoices.size(); i++)
+    {
+      cout << "[" << i << "]" << actionChoices[i] << endl;
+    }
+    int choice;
+    bool isChoiceinValid = true;
+    while (isChoiceinValid)
+    {
+      cout << "Choice - " << endl;
+      cin >> choice;
+      if (choice >= actionChoices.size())
+      {
+
+        cout << "Choice is invalid please select fromt he list" << endl;
+      }
+      else
+      {
+        isChoiceinValid = false;
+      }
+    }
+    switch (choice)
+    {
+    case 0:
+      // Playcard
+      for (size_t i = 0; i < players[i].playerHand.size(); i++)
+      {
+        CardBase card = players[i].playerHand[i];
+        cout << "[" << i << "] : " << card.title << endl;
+        cout << card.description << endl;
+        card.listCardValues();
+      }
+      cout << "Which card would you like to play?" << endl;
+      int cardChoice;
+      bool isCardChoiceinValid = true;
+      while (isCardChoiceinValid)
+      {
+        cout << "Choice - " << endl;
+        cin >> cardChoice;
+        if (cardChoice >= players[i].playerHand.size())
+        {
+
+          cout << "Choice is invalid please select fromt he list" << endl;
+        }
+        else
+        {
+          isCardChoiceinValid = false;
+        }
+      }
+      players[i].playCard(players[i].playerHand[cardChoice]);
+
+    case 1:
+      // use action
+      break;
+    default:
+      cout << "not a valid action" << endl;
+    }
+  }
+  if (havePassed.size() == players.size())
+  {
+    return;
+  }
+  else
+  {
+    havePassed.clear();
+    actionPhase();
+  }
+
+  // 1-2 actions or pass
   //-----
   // A) Play a card from your hand (see page 9).
   // check card requirements- pay for card and add values to player
@@ -484,6 +649,20 @@ void productionPhase()
 { // mc according to terraform rating
   // all production values added to bank
   // all banked energy converted to heat bank
+  for (size_t i = 0; i < players.size(); i++)
+  {
+    Player player = players[i];
+    player.bank.bankMap["heat"].second = player.bank.bankMap["heat"].second + player.bank.bankMap["energy"].second;
+    player.bank.bankMap["energy"].second = 0;
+
+    vector<pair<string, int>> newBankValues;
+    for (auto const &[key, val] : player.production.productionMap)
+    {
+      newBankValues.push_back({key, val.second});
+    }
+    player.bank.bankMap["megaCredits"].second = player.bank.bankMap["megaCredits"].second + player.terraformRating;
+    player.bank.updateBank(newBankValues);
+  }
 }
 void checkWinner()
 {
@@ -509,5 +688,37 @@ void createDeck()
   {
     CardBase newCard(corporationCards[i]);
     corporationDeck.push_back(newCard);
+  }
+}
+// testing read from file.
+class Card
+{
+public:
+  string title;
+  string description;
+  string type;
+  int years;
+};
+void testing()
+{
+
+  std::ifstream fin;
+  fin.open("input.txt");
+  if (!fin)
+  {
+    std::cerr << "Error in opening the file" << endl;
+  }
+
+  vector<Card> people;
+  Card temp;
+  while (fin >> temp.title >> temp.description >> temp.type)
+  {
+    people.push_back(temp);
+  }
+
+  // now print the information you read in
+  for (const auto &person : people)
+  {
+    cout << person.title << ' ' << person.description << ' ' << person.type << endl;
   }
 }
