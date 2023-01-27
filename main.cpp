@@ -690,35 +690,3 @@ void createDeck()
     corporationDeck.push_back(newCard);
   }
 }
-// testing read from file.
-class Card
-{
-public:
-  string title;
-  string description;
-  string type;
-  int years;
-};
-void testing()
-{
-
-  std::ifstream fin;
-  fin.open("input.txt");
-  if (!fin)
-  {
-    std::cerr << "Error in opening the file" << endl;
-  }
-
-  vector<Card> people;
-  Card temp;
-  while (fin >> temp.title >> temp.description >> temp.type)
-  {
-    people.push_back(temp);
-  }
-
-  // now print the information you read in
-  for (const auto &person : people)
-  {
-    cout << person.title << ' ' << person.description << ' ' << person.type << endl;
-  }
-}

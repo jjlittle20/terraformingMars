@@ -1,0 +1,25 @@
+##
+this is the card title
+this is the card description
+corporation
+2
+production:
+megaCredits
+3
+end
+bank:
+titanium
+2
+end
+costOffSet:
+end
+tags:
+space
+2
+end
+creatures:
+end
+action:
+end
+cardEnd
+fileEnd

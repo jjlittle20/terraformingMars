@@ -1,0 +1,31 @@
+##
+this is the card title
+this is the card description
+project
+2
+production:
+megaCredits
+3
+end
+bank:
+megaCredits
+2
+energy
+2
+end
+costOffSet:
+megaCredits
+4
+end
+tags:
+building
+1
+science
+2
+end
+creatures:
+end
+action:
+end
+cardEnd
+fileEnd
